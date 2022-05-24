@@ -38,6 +38,6 @@ class CreateUser extends Seeder
             ]
         ];
 
-        $model->insertBatch($date);
+        $model->protect(false)->insertBatch($date);
     }
 }
