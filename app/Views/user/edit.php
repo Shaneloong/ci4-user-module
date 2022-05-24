@@ -4,6 +4,19 @@
 
 
 <?= $this->section('content') ?>
+
+<?php if(session()->has('errors')): ?>
+    <div class="container mt-4">
+        <ul class="notification is-danger is-light">
+            <button class="delete"></button>
+    
+            <?php foreach(session('errors') as $error): ?>
+                <li><?= $error ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+<?php endif; ?>
+
 <div class="container my-5 w-50">
 
     
