@@ -54,6 +54,12 @@ class Users extends BaseController{
         $user->profile_image = $profile_image;
 
         if(!$this->userModel->insert($user)){
+            $path = '../public/uploads/profile_images/' . $profile_image;
+
+            if(is_file($path)){
+                unlink($path);
+            }
+
             return redirect()->back()
                             ->with('errors', $this->userModel->errors())
                             ->withInput();
@@ -90,7 +96,7 @@ class Users extends BaseController{
     public function updateImage($id){
         $user = $this->userModel->getUser($id);
 
-        $path = WRITEPATH . '/public/uploads/profile_images/' . $user->profile_image;
+        $path =  '../public/uploads/profile_images/' . $user->profile_image;
 
         $file = $this->request->getFile('profile_image');
 
@@ -139,6 +145,11 @@ class Users extends BaseController{
                 return redirect()->to('/users/show/' . $id)
                                 ->with('info', 'User Updated Sucessfully');
             }
+            else{
+                return redirect()->back()
+                                ->with('errors', $this->userModel->errors())
+                                ->withInput();
+            }
         }else{
             return redirect()->back()
                             ->with('warning', 'No Changes Made')
@@ -154,7 +165,11 @@ class Users extends BaseController{
                 'user'=> $user
             ]);
         }
+        $path = '../public/uploads/profile_images/' . $user->profile_image;
 
+        if(is_file($path)){
+            unlink($path);
+        }
         if($this->userModel->delete($id)){
             return redirect()->to('/')->with('info', 'User Deleted Sucessfully');
         }
@@ -168,7 +183,7 @@ class Users extends BaseController{
             $errorCode = $file->getError();
 
             if($errorCode === UPLOAD_ERR_NO_FILE){
-                return null;
+                return false;
             }
 
             throw new \RuntimeException($file->getErrorString(). " " . $errorCode);
@@ -177,7 +192,7 @@ class Users extends BaseController{
         $type = $file->getMimeType();
 
         if(! in_array($type, ['image/png', 'image/jpeg', 'image/jpg'])){
-            return "Invalid File";
+            return null;
         }
 
         if(! $file->hasMoved()){
@@ -193,7 +208,6 @@ class Users extends BaseController{
         $results = $this->userModel->search($this->request->getGet('keyword'));
 
         return $this->response->setJSON($results);
-
 
     }
 
