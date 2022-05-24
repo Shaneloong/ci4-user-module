@@ -185,11 +185,6 @@ class Users extends BaseController{
             $file->move('../public/uploads/profile_images', $newName);
         }
 
-        // $path = WRITEPATH . 'public/uploads/' . $file->store('profile_images');
-
-        // // service('image')->withFile($path)->fit(300, 300)->save($path);
-        // $file->move(WRITEPATH . 'public/uploads/');
-
         return $newName;
     }
 
