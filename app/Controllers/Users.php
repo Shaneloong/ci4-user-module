@@ -35,21 +35,40 @@ class Users extends BaseController{
 
         $file = $this->request->getFile('profile_image');
 
+
         $profile_image = $this->imageHandling($file);
 
+        $validation = service('validation');
+
+        $validation->setRules($this->userModel->validationRules, $this->userModel->validationMessages);
+        
+        $errors = [];   
+
+        if(! $validation->run($this->request->getPost())){
+            $errors = $validation->getErrors();
+        }
+
         if($profile_image === false){
-            return redirect()->to('/users/new')
+            return redirect()->back()
                             ->with('warning', 'No File is uploaded')
-                            ->withInput();
-        }else if($profile_image == null){
-            return redirect()->back()
-                            ->with('warning', 'No File Selected')
-                            ->withInput();
-        }else if ($profile_image == "Invalid File"){
-            return redirect()->back()
-                            ->with('warning', 'Invalid File')
+                            ->with('errors', $errors)
                             ->withInput();
         }
+
+        if($profile_image == 'invalid file'){
+            return redirect()->back()
+                            ->with('warning', 'Invalid File Type Uploaded (Only JPG, JPEG, PNG)')
+                            ->with('errors', $errors)
+                            ->withInput();
+        }
+
+        if($profile_image == 'oversize'){
+            return redirect()->back()
+                            ->with('warning', 'File is too large (Max Size: 2MB)')
+                            ->with('errors', $errors)
+                            ->withInput();
+        }
+
 
         $user->profile_image = $profile_image;
 
@@ -65,7 +84,7 @@ class Users extends BaseController{
                             ->withInput();
         }
 
-        return redirect()->to('/')->with('info', 'User Created Sucessfully');
+        return redirect()->to('/')->with('success', 'User Created Sucessfully');
     }
 
     public function show($id) {
@@ -82,16 +101,6 @@ class Users extends BaseController{
         ]);
     }
 
-    public function editImage($id){
-
-        $user = $this->userModel->getUser($id);
-
-        return view('user/profileImage', [
-            'user' => $user
-        ]);
-
-    }
-
 
     public function updateImage($id){
         $user = $this->userModel->getUser($id);
@@ -103,16 +112,23 @@ class Users extends BaseController{
         $profile_image = $this->imageHandling($file);
 
         if($profile_image === false){
-            return redirect()->to('/users/editImage/'. $user->id)
+            return redirect()->back()
+                            ->with('tabs', 'editImage')
                             ->with('warning', 'No File is uploaded')
                             ->withInput();
-        }else if($profile_image == null){
+        }
+
+        if($profile_image == 'invalid file'){
             return redirect()->back()
-                            ->with('warning', 'No File Selected')
+                            ->with('tabs', 'editImage')
+                            ->with('warning', 'Invalid File Type Uploaded (Only JPG, JPEG, PNG)')
                             ->withInput();
-        }else if ($profile_image == "Invalid File"){
+        }
+
+        if($profile_image == 'oversize'){
             return redirect()->back()
-                            ->with('warning', 'Invalid File')
+                            ->with('tabs', 'editImage')
+                            ->with('warning', 'File is too large (Max Size: 2MB)')
                             ->withInput();
         }
 
@@ -123,12 +139,9 @@ class Users extends BaseController{
         $user->profile_image = $profile_image;
 
         if($this->userModel->save($user)){
-            return redirect()->to('/')->with('info', 'User Updated Sucessfully');
+            return redirect()->to('/users/show/' . $user->id)->with('success', 'Profile Image Updated Sucessfully');
         }
     }
-
-
-
 
 
     public function update($id) {
@@ -138,12 +151,11 @@ class Users extends BaseController{
 
         
         $user->fill($post);
-        // dd($user);
 
         if($user->hasChanged()){
             if($this->userModel->protect(false)->save($user)){
                 return redirect()->to('/users/show/' . $id)
-                                ->with('info', 'User Updated Sucessfully');
+                                ->with('success', 'User Profile Updated Sucessfully');
             }
             else{
                 return redirect()->back()
@@ -171,7 +183,7 @@ class Users extends BaseController{
             unlink($path);
         }
         if($this->userModel->delete($id)){
-            return redirect()->to('/')->with('info', 'User Deleted Sucessfully');
+            return redirect()->to('/')->with('success', 'User Deleted Sucessfully');
         }
     }
 
@@ -192,7 +204,13 @@ class Users extends BaseController{
         $type = $file->getMimeType();
 
         if(! in_array($type, ['image/png', 'image/jpeg', 'image/jpg'])){
-            return null;
+            return 'invalid file';
+        }
+
+        $size = $file->getSizeByUnit('mb');
+
+        if($size > 2){
+            return 'oversize';
         }
 
         if(! $file->hasMoved()){
@@ -209,6 +227,28 @@ class Users extends BaseController{
 
         return $this->response->setJSON($results);
 
+    }
+
+    public function checkValidate(){
+        $user = $this->request->getPost();
+
+        $validation = service('validation');
+
+        $validation->setRules($this->userModel->validationRules, $this->userModel->validationMessages);
+
+        if(! $validation->run($user)){
+            
+            session()->setFlashdata('errors', $validation->getErrors());
+            if(session()->has('errors')){
+
+                return $this->response->setJSON(session('errors'));
+            }
+            else{
+                return $this->response->setJSON(['errors' => 'No Errors']);
+            }
+
+
+        }
     }
 
     

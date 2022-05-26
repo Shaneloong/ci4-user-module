@@ -13,14 +13,14 @@
                     <h1 class="display-5 fw-bold text-white"><?= $user->name ?></h1>
                     <p class="text-white"><?= $user->email ?></p>
                     <p class="col-md-8 fs-4 text-white"><?= $user->profile_description ?></p>
-                    <p class="badge bg-dark text-white p-2 fs-5"><?= $user->is_admin ? "Admin" : "Member" ?></p>
+                    <p class="badge bg-dark text-white p-2 fs-5"><?= ucfirst($user->gender) ?></p>
                     <div>
                         <a href="<?= site_url('/users/edit/' . $user->id) ?>" class="btn btn-primary btn-lg" type="button">Edit Profile</a>
-                        <a href="<?= site_url('/users/editImage/' . $user->id) ?>" class="btn btn-primary btn-lg" type="button">Edit Profile Image</a>
+                        <a href="<?= site_url('/') ?>" class="btn btn-outline-light btn-lg">Back</a>
                     </div>
                 </div>
                 <div class="col">
-                    <img src="/uploads/profile_images/<?= $user->profile_image ?>" class="w-75" alt="Profile Image">
+                    <img src="/uploads/profile_images/<?= $user->profile_image ?>" width="300px" height="300px"  alt="Profile Image">
                 </div>
             </div>
             

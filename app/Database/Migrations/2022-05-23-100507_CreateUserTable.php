@@ -34,10 +34,10 @@ class CreateUserTable extends Migration
                 'constraint' => '255',
                 'null' => true
             ],
-            'is_admin' => [
-                'type' => 'BOOLEAN',
-                'null' => false,
-                'default' => false
+            'gender' => [
+                'type' => 'VARCHAR',
+                'constraint' => '6',
+                'null' => false
             ],
             'created_at' => [
                 'type' => 'DATETIME',
