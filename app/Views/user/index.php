@@ -28,6 +28,7 @@
                 <th>Updated at</th>
                 <th>Action</th>
             </thead>
+
             <?php if($users): ?>
                 <?php foreach($users as $user): ?>
                     <tr>
