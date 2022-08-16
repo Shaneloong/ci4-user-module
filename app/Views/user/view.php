@@ -4,8 +4,6 @@
 
 <?= $this->section('content') ?> 
 <div class="container mt-5">
-
-    
     <div class="p-5 mb-4 bg-secondary rounded-3">
         <div class="container-fluid py-5">
             <div class="row row-cols-2">
